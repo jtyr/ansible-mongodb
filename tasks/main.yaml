@@ -37,7 +37,6 @@
   template:
     src: mongod.conf.j2
     dest: "{{ mongodb_config_file }}"
-  register: mongodb_config_result
   notify:
     - Restart mongod service
   tags:
@@ -54,9 +53,6 @@
   service:
     name: "{{ mongodb_service_name }}"
     state: started
-  when: >
-    mongodb_config_result is not defined or
-    not mongodb_config_result.changed
   register: mongodb_service_started
   tags:
     - mongodb_service
