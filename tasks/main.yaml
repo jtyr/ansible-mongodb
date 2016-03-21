@@ -1,26 +1,28 @@
 ---
 
-# There is no systemd support for MongoDB yet
 - name: Test distribution
   assert:
     that: >
-      ansible_os_family == "RedHat" and
-      ansible_distribution_major_version | int == 6
+      ansible_os_family == "RedHat"
+
+- name: Create YUM repo file
+  yum_repository:
+    name: mongodb
+    description: MongoDB YUM repo
+    baseurl: "{{ mongodb_yumrepo_url }}"
+    gpgcheck: no
+    params: "{{ mongodb_yumrepo_params }}"
+  tags:
+    - mongodb_pkg
 
 - name: Install MongoDB pacakges for RedHat
-  yum:
+  package:
     name: "{{ item }}"
-  with_items: mongodb_packages
+  with_items: "{{ mongodb_pkgs }}"
   notify:
     - Restart mongod service
   tags:
     - mongodb_pkg
-
-- name: Fix bug in the init.d script
-  lineinfile:
-    dest: /etc/init.d/{{ mongodb_service_name }}
-    line: PIDDIR=`dirname ${PIDFILEPATH:-{{ mongodb_processManagement_pidFilePath }}}`
-    regexp: ^PIDDIR=
 
 - name: Create MongoDB sysconfig file
   template:
@@ -28,18 +30,33 @@
     dest: "{{ mongodb_sysconfig_file }}"
   notify:
     - Restart mongod service
+  tags:
+    - mongodb_config
 
 - name: Create main MongoDB config file
   template:
     src: mongod.conf.j2
     dest: "{{ mongodb_config_file }}"
+  register: mongodb_config_result
   notify:
     - Restart mongod service
   tags:
     - mongodb_config
 
-- name: Start MongoDB service
+- name: Enable MongoDB service
   service:
     name: "{{ mongodb_service_name }}"
     enabled: yes
+  tags:
+    - mongodb_service
+
+- name: Start MongoDB service
+  service:
+    name: "{{ mongodb_service_name }}"
     state: started
+  when: >
+    mongodb_config_result is not defined or
+    not mongodb_config_result.changed
+  register: mongodb_service_started
+  tags:
+    - mongodb_service

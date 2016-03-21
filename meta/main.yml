@@ -4,18 +4,12 @@ galaxy_info:
   author: Jiri Tyr
   description: Role which installs and configures MongoDB
   license: MIT
-  min_ansible_version: 1.7
+  min_ansible_version: 2.1
   platforms:
     - name: EL
       versions:
         - 6
+        - 7
   categories:
     - system
-dependencies:
-  - role: common/yumrepo
-    yumrepo_repos:
-      mongodb:
-        name: MongoDB repository
-        baseurl: "{{ mongodb_yum_repo_url }}"
-        gpgcheck: 0
-  - common/mongodb
+dependencies: []

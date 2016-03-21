@@ -75,15 +75,17 @@ Examples
             enabled: true
 ```
 
-This role requires [Config Encoder
-Macros](https://github.com/picotrading/config-encoder-macros) which must be
-placed into the same directory as the playbook:
+This role requires [Config
+Encoders](https://github.com/jtyr/ansible/blob/jtyr-config_encoders/lib/ansible/plugins/filter/config_encoders.py)
+which must be configured in the `ansible.cfg` file like this:
 
 ```
-$ ls -1 *.yaml
-site.yaml
-$ git clone https://github.com/picotrading/config-encoder-macros.git ./templates/encoder
+[defaults]
+
+filter_plugins = ./plugins/filter/
 ```
+
+Where the `./plugins/filter/` containes the `config_encoders.py` file.
 
 
 Role variables
@@ -92,8 +94,14 @@ Role variables
 List of variables used by the role:
 
 ```
-# Default list of RPM packages to install
-mongodb_packages:
+# Default YUM repo
+mongodb_yumrepo_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/stable/$basearch/
+
+# Additional yumrepo params
+mongodb_yumrepo_params: {}
+
+# Packages to be installed (version can be specified here)
+mongodb_pkgs:
   - mongodb-org
 
 # Default config file location
@@ -339,7 +347,7 @@ mongodb_config_complete:
 
 
 ###
-# The configuration bellow was taken from this post:
+# The configuration templates bellow was inspired by this post:
 # http://dba.stackexchange.com/a/82592
 ###
 
@@ -444,14 +452,40 @@ mongodb_config_mongos_server:
 
 # Default MongoDB config
 mongodb_config: "{{ mongodb_config_simple }}"
+
+
+# Default sysconfig options
+mongodb_sysconfig__default:
+  "Path to the main config file":
+    CONFIGFILE: "{{ mongodb_config_file }}"
+  "Daemon options":
+    OPTIONS: " -f $CONFIGFILE"
+  "Path to the DB files":
+    DBPATH: "{{ mongodb_storage_dbPath }}"
+  "PID file":
+    PIDFILEPATH: "{{ mongodb_processManagement_pidFilePath }}"
+  "PID directory":
+    PIDDIR: "{{ mongodb_processManagement_pidFilePath | regex_replace('/.[^/]+$', '') }}"
+  "Mongo user and group":
+    MONGO_USER: "{{ mongodb_user }}"
+    MONGO_GROUP: "{{ mongodb_group }}"
+  "Verify the existence of numactl":
+    NUMACTL_ARGS: "{{ mongodb_numactl_args }}"
+
+# Custom sysconfig options
+mongodb_sysconfig__custom: {}
+
+# Final sysconfig
+mongodb_sysconfig: "{{
+  mongodb_sysconfig__default.update(mongodb_sysconfig__custom) }}{{
+  mongodb_sysconfig__default }}"
 ```
 
 
 Dependencies
 ------------
 
-* [`yumrepo`](https://github.com/picotrading/ansible-yumrepo) role
-* [Config Encoder Macros](https://github.com/picotrading/config-encoder-macros)
+- [Config Encoders](https://github.com/jtyr/ansible/blob/jtyr-config_encoders/lib/ansible/plugins/filter/config_encoders.py)
 
 
 License

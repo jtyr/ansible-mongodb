@@ -2,5 +2,8 @@
 
 - name: Restart mongod service
   service:
-    name: mongod
+    name: "{{ mongodb_service_name }}"
     state: restarted
+  when: >
+    mongodb_service_started is not defined or
+    not mongodb_service_started.changed
