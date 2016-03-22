@@ -15,7 +15,7 @@
   tags:
     - mongodb_pkg
 
-- name: Install MongoDB pacakges for RedHat
+- name: Install MongoDB packages for RedHat
   package:
     name: "{{ item }}"
   with_items: "{{ mongodb_pkgs }}"
