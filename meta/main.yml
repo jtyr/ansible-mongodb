@@ -2,7 +2,7 @@
 
 galaxy_info:
   author: Jiri Tyr
-  description: Role which installs and configures MongoDB
+  description: Role which installs and configures MongoDB.
   license: MIT
   min_ansible_version: 2.1
   platforms:
@@ -12,4 +12,5 @@ galaxy_info:
         - 7
   categories:
     - system
-dependencies: []
+dependencies:
+  - config_encoder_filters
