@@ -82,8 +82,11 @@ Role variables
 List of variables used by the role:
 
 ```
+# Default YUM repo release
+mongodb_yumrepo_release: 3.4
+
 # Default YUM repo
-mongodb_yumrepo_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/stable/$basearch/
+mongodb_yumrepo_url: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/{{ mongodb_yumrepo_release }}/$basearch/
 
 # Additional yumrepo params
 mongodb_yumrepo_params: {}
